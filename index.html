@@ -121,7 +121,6 @@
   }
   .hero-actions { display: flex; gap: 16px; flex-wrap: wrap; }
   .hero-visual {
-    background: var(--brand);
     height: 460px;
     border-radius: 2px;
     display: flex;
@@ -132,15 +131,11 @@
     font-size: 20px;
     position: relative;
     overflow: hidden;
+    background-image: url('pictures/for hero seciton.jpg');
+    background-size: cover;
+    background-position: center;
   }
-  .hero-visual::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background:
-      repeating-linear-gradient(45deg, transparent 0 24px, rgba(255,255,255,0.06) 24px 26px);
-  }
-  .hero-visual span { position: relative; z-index: 1; }
+  .hero-visual span { position: relative; z-index: 1; text-shadow: 0 2px 8px rgba(0,0,0,0.4); }
 
   /* SECTION HEADER */
   .section { padding: 70px 0; }
@@ -196,13 +191,7 @@
     position: relative;
     overflow: hidden;
   }
-  .service-img::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: repeating-linear-gradient(45deg, transparent 0 22px, rgba(255,255,255,0.07) 22px 24px);
-  }
-  .service-img span { position: relative; z-index: 1; }
+  .service-img span { position: relative; z-index: 1; text-shadow: 0 2px 6px rgba(0,0,0,0.4); }
   .service-body { padding: 20px 24px 24px; display: flex; flex-direction: column; flex: 1; }
   .service-body h3 { font-family: var(--serif); font-size: 22px; font-weight: 500; margin: 0 0 10px; }
   .service-body p { font-size: 14px; opacity: 0.8; margin-bottom: 18px; flex: 1; }
@@ -211,7 +200,6 @@
   /* ABOUT */
   .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: start; }
   .about-visual {
-    background: var(--accent);
     height: 480px;
     display: flex;
     align-items: flex-end;
@@ -221,14 +209,11 @@
     font-size: 20px;
     position: relative;
     overflow: hidden;
+    background-image: url('pictures/for about section.jpg');
+    background-size: cover;
+    background-position: center;
   }
-  .about-visual::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: repeating-linear-gradient(-45deg, transparent 0 24px, rgba(255,255,255,0.08) 24px 26px);
-  }
-  .about-visual span { position: relative; z-index: 1; }
+  .about-visual span { position: relative; z-index: 1; text-shadow: 0 2px 8px rgba(0,0,0,0.4); }
   .about-copy h2 {
     font-family: var(--serif);
     font-size: clamp(32px, 4vw, 48px);
@@ -534,7 +519,7 @@
     </div>
     <div class="service-grid">
       <div class="service-card">
-        <div class="service-img" style="background:#B85E1C"><span>School Uniforms</span></div>
+        <div class="service-img" style="background-image:url('pictures/school uniforms.png');background-size:cover;background-position:center"><span>School Uniforms</span></div>
         <div class="service-body">
           <h3>School Uniforms</h3>
           <p>Uniforms in school colours, sized across all grades, produced in bulk with consistent fit and durable fabrics.</p>
@@ -542,7 +527,7 @@
         </div>
       </div>
       <div class="service-card">
-        <div class="service-img" style="background:#175136"><span>Event T-Shirts</span></div>
+        <div class="service-img" style="background-image:url('pictures/for event t-shirts.jpg');background-size:cover;background-position:center"><span>Event T-Shirts</span></div>
         <div class="service-body">
           <h3>Event T-Shirts</h3>
           <p>Custom t-shirts and event wear with your logo and artwork, printed and finished for launches, conferences, and campaigns.</p>
@@ -550,7 +535,7 @@
         </div>
       </div>
       <div class="service-card">
-        <div class="service-img" style="background:#C59057"><span>Organization Apparel</span></div>
+        <div class="service-img" style="background-image:url('pictures/organization apparel.jpg');background-size:cover;background-position:center"><span>Organization Apparel</span></div>
         <div class="service-body">
           <h3>Organization Apparel</h3>
           <p>Uniforms and branded clothing for teams, offices, and institutions, from staff kits to full-branded wardrobes.</p>
@@ -558,7 +543,7 @@
         </div>
       </div>
       <div class="service-card">
-        <div class="service-img" style="background:#6E4A2A"><span>Bespoke &amp; Custom</span></div>
+        <div class="service-img" style="background-image:url('pictures/for bespoke &amp; custom.jpg');background-size:cover;background-position:center"><span>Bespoke &amp; Custom</span></div>
         <div class="service-body">
           <h3>Bespoke &amp; Custom</h3>
           <p>Made-to-measure pieces and custom tailoring when your project needs a personal, hand-finished touch.</p>
