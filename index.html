@@ -181,8 +181,8 @@
   }
   .service-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(42,36,29,0.08); }
   .service-card.is-hidden { display: none; }
-  .services-toggle { text-align: center; margin-top: 32px; }
-  .services-toggle .btn-outline { min-width: 220px; }
+  .services-toggle { text-align: center; margin-top: 32px; display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+  .services-toggle .btn-outline { min-width: 200px; }
   /* Auto carousel — every 1s */
   .service-carousel-wrap { position: relative; overflow: hidden; }
   .service-carousel-track { display: flex; gap: 24px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; scrollbar-width: none; -ms-overflow-style: none; padding-bottom: 8px; }
@@ -196,7 +196,16 @@
   @media (max-width: 900px) {
     .service-carousel-track .service-card { flex: 0 0 calc(50% - 12px); }
   }
+  /* Expanded grid state */
+  .service-grid.is-grid { display: grid; grid-template-columns: repeat(4, 1fr); overflow: visible; scroll-snap-type: none; }
+  .service-grid.is-grid .service-card { flex: none; }
+  .service-carousel-wrap.is-grid .carousel-controls,
+  .service-carousel-wrap.is-grid .carousel-dots { display: none; }
+  @media (max-width: 900px) {
+    .service-grid.is-grid { grid-template-columns: repeat(2, 1fr); }
+  }
   @media (max-width: 560px) {
+    .service-grid.is-grid { grid-template-columns: 1fr; }
     .service-carousel-track .service-card { flex: 0 0 86%; }
   }
   @media (prefers-reduced-motion: reduce) {
@@ -630,6 +639,7 @@
     </div>
     <div class="services-toggle">
       <button class="btn btn-outline" id="services-toggle" aria-pressed="false">Pause carousel</button>
+      <button class="btn" id="services-expand" aria-expanded="false">View all as grid</button>
     </div>
   </div>
 </section>
@@ -828,13 +838,15 @@
     showToast('Opening your email app...');
   });
 
-  // Services auto carousel — every 1s, pause on interaction
+  // Services — carousel (1s) + expand to grid by choice
   (function () {
     var track = document.getElementById('service-track');
+    var wrap = document.querySelector('.service-carousel-wrap');
     var prevBtn = document.getElementById('carousel-prev');
     var nextBtn = document.getElementById('carousel-next');
     var dotsWrap = document.getElementById('carousel-dots');
     var pauseBtn = document.getElementById('services-toggle');
+    var expandBtn = document.getElementById('services-expand');
     if (!track) return;
     var cards = track.querySelectorAll('.service-card');
     if (!cards.length) return;
@@ -904,15 +916,39 @@
       paused = !paused;
       pauseBtn.setAttribute('aria-pressed', paused ? 'true' : 'false');
       pauseBtn.textContent = paused ? 'Play carousel' : 'Pause carousel';
-      if (paused) stop(); else start();
+      if (paused) stop(); else if (!isGrid()) start();
     });
-    track.addEventListener('mouseenter', stop);
-    track.addEventListener('mouseleave', function () { if (!paused) start(); });
-    track.addEventListener('focusin', stop);
-    track.addEventListener('focusout', function () { if (!paused) start(); });
-    track.addEventListener('touchstart', stop, { passive: true });
-    track.addEventListener('touchend', function () { if (!paused) setTimeout(start, 1200); });
-    document.addEventListener('visibilitychange', function () { if (document.hidden) stop(); else if (!paused) start(); });
+    var isGrid = function () { return track.classList.contains('is-grid'); };
+    function setGrid(on) {
+      if (on) {
+        track.classList.add('is-grid');
+        if (wrap) wrap.classList.add('is-grid');
+        stop();
+        track.scrollTo({ left: 0, behavior: 'auto' });
+        if (expandBtn) { expandBtn.textContent = 'Back to carousel'; expandBtn.setAttribute('aria-expanded', 'true'); }
+        if (pauseBtn) pauseBtn.style.display = 'none';
+      } else {
+        track.classList.remove('is-grid');
+        if (wrap) wrap.classList.remove('is-grid');
+        cur = 0;
+        buildDots();
+        go(0, false);
+        if (expandBtn) { expandBtn.textContent = 'View all as grid'; expandBtn.setAttribute('aria-expanded', 'false'); }
+        if (pauseBtn) pauseBtn.style.display = '';
+        if (!paused) start();
+      }
+    }
+    if (expandBtn) expandBtn.addEventListener('click', function () {
+      setGrid(!isGrid());
+      document.getElementById('services').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    track.addEventListener('mouseenter', function () { if (!isGrid()) stop(); });
+    track.addEventListener('mouseleave', function () { if (!paused && !isGrid()) start(); });
+    track.addEventListener('focusin', function () { if (!isGrid()) stop(); });
+    track.addEventListener('focusout', function () { if (!paused && !isGrid()) start(); });
+    track.addEventListener('touchstart', function () { if (!isGrid()) stop(); }, { passive: true });
+    track.addEventListener('touchend', function () { if (!paused && !isGrid()) setTimeout(start, 1200); });
+    document.addEventListener('visibilitychange', function () { if (document.hidden) stop(); else if (!paused && !isGrid()) start(); });
     var scrollTimeout;
     track.addEventListener('scroll', function () {
       clearTimeout(scrollTimeout);
@@ -922,7 +958,7 @@
         updateDots();
       }, 80);
     });
-    window.addEventListener('resize', function () { buildDots(); go(cur, false); });
+    window.addEventListener('resize', function () { if (isGrid()) return; buildDots(); go(cur, false); });
     buildDots();
     go(0, false);
     start();
