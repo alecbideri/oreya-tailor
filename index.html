@@ -183,6 +183,25 @@
   .service-card.is-hidden { display: none; }
   .services-toggle { text-align: center; margin-top: 32px; }
   .services-toggle .btn-outline { min-width: 220px; }
+  /* Auto carousel — every 1s */
+  .service-carousel-wrap { position: relative; overflow: hidden; }
+  .service-carousel-track { display: flex; gap: 24px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; scrollbar-width: none; -ms-overflow-style: none; padding-bottom: 8px; }
+  .service-carousel-track::-webkit-scrollbar { display: none; }
+  .service-carousel-track .service-card { flex: 0 0 calc(33.333% - 16px); scroll-snap-align: start; min-width: 0; }
+  .carousel-dots { display: flex; justify-content: center; gap: 8px; margin-top: 20px; }
+  .carousel-dots button { width: 8px; height: 8px; border-radius: 50%; border: 1px solid var(--brand); background: transparent; padding: 0; cursor: pointer; transition: background 0.2s; }
+  .carousel-dots button.is-active { background: var(--brand); }
+  .carousel-controls { display: flex; justify-content: center; gap: 12px; margin-top: 14px; }
+  .carousel-controls button { width: 36px; height: 36px; border: 1px solid rgba(42,36,29,0.15); background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  @media (max-width: 900px) {
+    .service-carousel-track .service-card { flex: 0 0 calc(50% - 12px); }
+  }
+  @media (max-width: 560px) {
+    .service-carousel-track .service-card { flex: 0 0 86%; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .service-carousel-track { scroll-behavior: auto; }
+  }
   .service-img {
     height: 180px;
     display: flex;
@@ -520,7 +539,8 @@
       </div>
       <a href="#contact" class="view-all">Request a Quote</a>
     </div>
-    <div class="service-grid">
+    <div class="service-carousel-wrap">
+      <div class="service-grid service-carousel-track" id="service-track" role="region" aria-label="Featured services" tabindex="0">
       <div class="service-card">
         <div class="service-img" style="background-image:url('pictures/for bespoke &amp; custom.jpg');background-size:cover;background-position:center"><span>Custom Tailoring</span></div>
         <div class="service-body">
@@ -553,7 +573,7 @@
           <a href="#contact">Get a Quote</a>
         </div>
       </div>
-      <div class="service-card is-hidden">
+      <div class="service-card">
         <div class="service-img" style="background-image:url('pictures/Bridal wear.jpg');background-size:cover;background-position:center"><span>Bridal Wear</span></div>
         <div class="service-body">
           <h3>Bridal Wear</h3>
@@ -561,7 +581,7 @@
           <a href="#contact">Get a Quote</a>
         </div>
       </div>
-      <div class="service-card is-hidden">
+      <div class="service-card">
         <div class="service-img" style="background-image:url('pictures/for about section.jpg');background-size:cover;background-position:center"><span>Traditional &amp; Contemporary</span></div>
         <div class="service-body">
           <h3>Traditional &amp; Contemporary Clothing</h3>
@@ -569,7 +589,7 @@
           <a href="#contact">Get a Quote</a>
         </div>
       </div>
-      <div class="service-card is-hidden">
+      <div class="service-card">
         <div class="service-img" style="background-image:url('pictures/Clothing alterations.jpg');background-size:cover;background-position:center"><span>Clothing Alterations</span></div>
         <div class="service-body">
           <h3>Clothing Alterations</h3>
@@ -577,7 +597,7 @@
           <a href="#contact">Get a Quote</a>
         </div>
       </div>
-      <div class="service-card is-hidden">
+      <div class="service-card">
         <div class="service-img" style="background-image:url('pictures/Fashion accessories.jpg');background-size:cover;background-position:center"><span>Fashion Accessories</span></div>
         <div class="service-body">
           <h3>Fashion Accessories</h3>
@@ -585,7 +605,7 @@
           <a href="#contact">Get a Quote</a>
         </div>
       </div>
-      <div class="service-card is-hidden">
+      <div class="service-card">
         <div class="service-img" style="background-image:url('pictures/for event t-shirts.jpg');background-size:cover;background-position:center"><span>Textile Production</span></div>
         <div class="service-body">
           <h3>Textile Production</h3>
@@ -593,7 +613,7 @@
           <a href="#contact">Get a Quote</a>
         </div>
       </div>
-      <div class="service-card is-hidden">
+      <div class="service-card">
         <div class="service-img" style="background-image:url('pictures/export of garment.jpg');background-size:cover;background-position:center"><span>Export</span></div>
         <div class="service-body">
           <h3>Export of Garments &amp; Textile Products</h3>
@@ -601,9 +621,15 @@
           <a href="#contact">Get a Quote</a>
         </div>
       </div>
+      </div>
+      <div class="carousel-controls">
+        <button id="carousel-prev" aria-label="Previous services">&#8592;</button>
+        <button id="carousel-next" aria-label="Next services">&#8594;</button>
+      </div>
+      <div class="carousel-dots" id="carousel-dots" role="tablist" aria-label="Service slides"></div>
     </div>
     <div class="services-toggle">
-      <button class="btn btn-outline" id="services-toggle" aria-expanded="false">View all 10 services</button>
+      <button class="btn btn-outline" id="services-toggle" aria-pressed="false">Pause carousel</button>
     </div>
   </div>
 </section>
@@ -802,20 +828,105 @@
     showToast('Opening your email app...');
   });
 
-  // Services expand/collapse by choice
-  var svcBtn = document.getElementById('services-toggle');
-  var extraCards = document.querySelectorAll('.service-card.is-hidden');
-  if (svcBtn) {
-    svcBtn.addEventListener('click', function () {
-      var expanded = svcBtn.getAttribute('aria-expanded') === 'true';
-      extraCards.forEach(function (c) { c.classList.toggle('is-hidden', expanded); });
-      svcBtn.setAttribute('aria-expanded', expanded ? 'false' : 'true');
-      svcBtn.textContent = expanded ? 'View all 10 services' : 'Show less';
-      if (!expanded) {
-        document.getElementById('services').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // Services auto carousel — every 1s, pause on interaction
+  (function () {
+    var track = document.getElementById('service-track');
+    var prevBtn = document.getElementById('carousel-prev');
+    var nextBtn = document.getElementById('carousel-next');
+    var dotsWrap = document.getElementById('carousel-dots');
+    var pauseBtn = document.getElementById('services-toggle');
+    if (!track) return;
+    var cards = track.querySelectorAll('.service-card');
+    if (!cards.length) return;
+    var perView = 3, cur = 0, timer = null, paused = false;
+    function calcPerView() {
+      if (window.innerWidth <= 560) return 1;
+      if (window.innerWidth <= 900) return 2;
+      return 3;
+    }
+    function maxIndex() { return Math.max(0, cards.length - perView); }
+    function cardStep() {
+      if (!cards[0]) return 0;
+      var gap = 24;
+      return cards[0].getBoundingClientRect().width + gap;
+    }
+    function go(idx, smooth) {
+      perView = calcPerView();
+      var max = maxIndex();
+      cur = Math.max(0, Math.min(idx, max));
+      var left = cur * cardStep();
+      track.scrollTo({ left: left, behavior: smooth ? 'smooth' : 'auto' });
+      updateDots();
+    }
+    function next() {
+      perView = calcPerView();
+      var max = maxIndex();
+      var nxt = cur + 1;
+      if (nxt > max) nxt = 0;
+      go(nxt, true);
+    }
+    function prev() {
+      perView = calcPerView();
+      var max = maxIndex();
+      var prv = cur - 1;
+      if (prv < 0) prv = max;
+      go(prv, true);
+    }
+    function buildDots() {
+      perView = calcPerView();
+      var count = maxIndex() + 1;
+      dotsWrap.innerHTML = '';
+      for (var i = 0; i < count; i++) {
+        var b = document.createElement('button');
+        b.setAttribute('role', 'tab');
+        b.setAttribute('aria-label', 'Go to slide ' + (i+1));
+        b.dataset.index = i;
+        b.addEventListener('click', (function (idx) { return function () { go(idx, true); restart(); }; })(i));
+        dotsWrap.appendChild(b);
       }
+      updateDots();
+    }
+    function updateDots() {
+      var btns = dotsWrap.querySelectorAll('button');
+      btns.forEach(function (b, i) { b.classList.toggle('is-active', i === cur); b.setAttribute('aria-selected', i === cur ? 'true' : 'false'); });
+    }
+    function start() {
+      if (paused) return;
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      stop();
+      timer = setInterval(next, 1000);
+    }
+    function stop() { if (timer) { clearInterval(timer); timer = null; } }
+    function restart() { stop(); if (!paused) start(); }
+    if (prevBtn) prevBtn.addEventListener('click', function () { prev(); restart(); });
+    if (nextBtn) nextBtn.addEventListener('click', function () { next(); restart(); });
+    if (pauseBtn) pauseBtn.addEventListener('click', function () {
+      paused = !paused;
+      pauseBtn.setAttribute('aria-pressed', paused ? 'true' : 'false');
+      pauseBtn.textContent = paused ? 'Play carousel' : 'Pause carousel';
+      if (paused) stop(); else start();
     });
-  }
+    track.addEventListener('mouseenter', stop);
+    track.addEventListener('mouseleave', function () { if (!paused) start(); });
+    track.addEventListener('focusin', stop);
+    track.addEventListener('focusout', function () { if (!paused) start(); });
+    track.addEventListener('touchstart', stop, { passive: true });
+    track.addEventListener('touchend', function () { if (!paused) setTimeout(start, 1200); });
+    document.addEventListener('visibilitychange', function () { if (document.hidden) stop(); else if (!paused) start(); });
+    var scrollTimeout;
+    track.addEventListener('scroll', function () {
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(function () {
+        var step = cardStep();
+        if (step) cur = Math.round(track.scrollLeft / step);
+        updateDots();
+      }, 80);
+    });
+    window.addEventListener('resize', function () { buildDots(); go(cur, false); });
+    buildDots();
+    go(0, false);
+    start();
+  })();
 </script>
 </body>
 </html>
