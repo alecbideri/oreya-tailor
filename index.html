@@ -176,10 +176,13 @@
     display: flex;
     flex-direction: column;
     background: #fff;
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, opacity 0.3s ease;
     overflow: hidden;
   }
   .service-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(42,36,29,0.08); }
+  .service-card.is-hidden { display: none; }
+  .services-toggle { text-align: center; margin-top: 32px; }
+  .services-toggle .btn-outline { min-width: 220px; }
   .service-img {
     height: 180px;
     display: flex;
@@ -535,7 +538,7 @@
         </div>
       </div>
       <div class="service-card">
-        <div class="service-img" style="background-image:url('pictures/school uniforms.png');background-size:cover;background-position:center"><span>School Uniforms</span></div>
+        <div class="service-img" style="background-image:url('pictures/school uniforms.jpg');background-size:cover;background-position:center"><span>School Uniforms</span></div>
         <div class="service-body">
           <h3>School Uniforms</h3>
           <p>Durable uniforms in school colours, sized across all grades and produced in bulk with consistent fit.</p>
@@ -550,7 +553,7 @@
           <a href="#contact">Get a Quote</a>
         </div>
       </div>
-      <div class="service-card">
+      <div class="service-card is-hidden">
         <div class="service-img" style="background-image:url('pictures/Bridal wear.jpg');background-size:cover;background-position:center"><span>Bridal Wear</span></div>
         <div class="service-body">
           <h3>Bridal Wear</h3>
@@ -558,7 +561,7 @@
           <a href="#contact">Get a Quote</a>
         </div>
       </div>
-      <div class="service-card">
+      <div class="service-card is-hidden">
         <div class="service-img" style="background-image:url('pictures/for about section.jpg');background-size:cover;background-position:center"><span>Traditional &amp; Contemporary</span></div>
         <div class="service-body">
           <h3>Traditional &amp; Contemporary Clothing</h3>
@@ -566,7 +569,7 @@
           <a href="#contact">Get a Quote</a>
         </div>
       </div>
-      <div class="service-card">
+      <div class="service-card is-hidden">
         <div class="service-img" style="background-image:url('pictures/Clothing alterations.jpg');background-size:cover;background-position:center"><span>Clothing Alterations</span></div>
         <div class="service-body">
           <h3>Clothing Alterations</h3>
@@ -574,7 +577,7 @@
           <a href="#contact">Get a Quote</a>
         </div>
       </div>
-      <div class="service-card">
+      <div class="service-card is-hidden">
         <div class="service-img" style="background-image:url('pictures/Fashion accessories.jpg');background-size:cover;background-position:center"><span>Fashion Accessories</span></div>
         <div class="service-body">
           <h3>Fashion Accessories</h3>
@@ -582,7 +585,7 @@
           <a href="#contact">Get a Quote</a>
         </div>
       </div>
-      <div class="service-card">
+      <div class="service-card is-hidden">
         <div class="service-img" style="background-image:url('pictures/for event t-shirts.jpg');background-size:cover;background-position:center"><span>Textile Production</span></div>
         <div class="service-body">
           <h3>Textile Production</h3>
@@ -590,7 +593,7 @@
           <a href="#contact">Get a Quote</a>
         </div>
       </div>
-      <div class="service-card">
+      <div class="service-card is-hidden">
         <div class="service-img" style="background-image:url('pictures/export of garment.jpg');background-size:cover;background-position:center"><span>Export</span></div>
         <div class="service-body">
           <h3>Export of Garments &amp; Textile Products</h3>
@@ -598,6 +601,9 @@
           <a href="#contact">Get a Quote</a>
         </div>
       </div>
+    </div>
+    <div class="services-toggle">
+      <button class="btn btn-outline" id="services-toggle" aria-expanded="false">View all 10 services</button>
     </div>
   </div>
 </section>
@@ -795,6 +801,21 @@
     window.location.href = 'mailto:info@oreyatailor.com?subject=' + subject + '&body=' + body;
     showToast('Opening your email app...');
   });
+
+  // Services expand/collapse by choice
+  var svcBtn = document.getElementById('services-toggle');
+  var extraCards = document.querySelectorAll('.service-card.is-hidden');
+  if (svcBtn) {
+    svcBtn.addEventListener('click', function () {
+      var expanded = svcBtn.getAttribute('aria-expanded') === 'true';
+      extraCards.forEach(function (c) { c.classList.toggle('is-hidden', expanded); });
+      svcBtn.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+      svcBtn.textContent = expanded ? 'View all 10 services' : 'Show less';
+      if (!expanded) {
+        document.getElementById('services').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  }
 </script>
 </body>
 </html>
