@@ -400,6 +400,36 @@
   .modal-success .btn { width: 100%; margin-bottom: 10px; }
   .modal-success .success-done { background: transparent; color: var(--brand); border: 1px solid var(--brand); }
   .modal-success .success-done:hover { background: var(--brand); color: #fff; }
+  .form-error {
+    font-size: 13px;
+    color: #A33B1F;
+    background: rgba(163,59,31,0.08);
+    padding: 10px 12px;
+    margin-top: 10px;
+  }
+  .modal-email-note {
+    margin-top: 16px;
+    font-size: 13px;
+    opacity: 0.8;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .modal-email-note .email-copy { font-family: var(--serif); font-size: 15px; color: var(--brand); font-weight: 500; }
+  .email-copy-btn {
+    background: none;
+    border: 1px solid var(--brand);
+    color: var(--brand);
+    padding: 4px 12px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+  }
+  .email-copy-btn:hover { background: var(--brand); color: #fff; }
   .toast {
     position: fixed;
     bottom: 24px;
@@ -749,32 +779,33 @@
 <div class="modal-overlay" id="modal">
   <div class="modal">
     <button class="modal-close" id="modal-close" aria-label="Close">&times;</button>
-    <h3>Contact Us for a Quote</h3>
-    <p>Call the Commercial Director or send us a message.</p>
 
-    <div class="modal-label">Commercial Director &mdash; Divine SINIGIRIRA</div>
-    <div class="copy-box">
-      <span class="num">0787 314 307</span>
-      <button id="copy-number" data-number="0787 314 307">Copy Number</button>
+    <div id="modal-main">
+      <h3>Contact Us for a Quote</h3>
+      <p>Call the Commercial Director or send us a message.</p>
+
+      <div class="modal-label">Commercial Director &mdash; Divine SINIGIRIRA</div>
+      <div class="copy-box">
+        <span class="num">0787 314 307</span>
+        <button id="copy-number" data-number="0787 314 307">Copy Number</button>
+      </div>
+
+      <div class="modal-divider">or send a message</div>
+
+      <form id="quote-form">
+        <input type="email" placeholder="Your email" required />
+        <textarea placeholder="Tell us about your project..." required></textarea>
+        <button type="submit" class="btn">Send Message</button>
+        <div class="form-error" id="form-error" style="display:none">Couldn't send right now. Please <a href="mailto:info@oreyatailor.com" style="color:var(--brand)">email us directly</a> or call the number above.</div>
+      </form>
+      <div class="modal-email-note">Prefer your email app? Copy <span class="email-copy">info@oreyatailor.com</span> <button type="button" id="copy-email" class="email-copy-btn">Copy</button></div>
     </div>
-
-    <div class="modal-divider">or send a message</div>
-
-    <form id="quote-form">
-      <input type="text" placeholder="Your name" required />
-      <input type="email" placeholder="Your email" required />
-      <textarea placeholder="Tell us about your project..." required></textarea>
-      <button type="submit" class="btn">Send to info@oreyatailor.com</button>
-    </form>
-    <div class="form-note" id="form-note">Your message opens in your email app.</div>
 
     <div class="modal-success" id="modal-success" style="display:none">
       <div class="success-icon">&#10003;</div>
-      <h3>Your draft is ready</h3>
-      <p>Your email app should have opened with your message addressed to <strong>info@oreyatailor.com</strong>. Just press send there and we'll get back to you.</p>
-      <a class="btn" id="reopen-draft" href="#">Open draft again</a>
+      <h3>Message sent!</h3>
+      <p>Thank you for reaching out. We'll get back to you shortly.</p>
       <button type="button" class="btn btn-outline success-done">Done</button>
-      <div class="form-note">Didn't open? Copy the address above or call us directly.</div>
     </div>
   </div>
 </div>
@@ -854,38 +885,80 @@
     }
   });
 
-  document.getElementById('quote-form').addEventListener('submit', function (e) {
-    e.preventDefault();
-    var formView = [
-      this,
-      document.querySelector('.modal h3'),
-      document.querySelector('.modal > p'),
-      document.querySelector('.modal-label'),
-      document.querySelector('.copy-box'),
-      document.querySelector('.modal-divider'),
-      document.getElementById('form-note')
-    ];
-    var name = this.querySelector('input[type="text"]').value;
-    var email = this.querySelector('input[type="email"]').value;
-    var msg = this.querySelector('textarea').value;
-    var subject = encodeURIComponent('Project Quote Request from ' + name);
-    var body = encodeURIComponent('Name: ' + name + '\nEmail: ' + email + '\n\n' + msg);
-    var mailto = 'mailto:info@oreyatailor.com?subject=' + subject + '&body=' + body;
-    window.location.href = mailto;
-    var reopen = document.getElementById('reopen-draft');
-    reopen.setAttribute('href', mailto);
-    formView.forEach(function (el) { if (el) el.style.display = 'none'; });
-    document.getElementById('modal-success').style.display = 'block';
-  });
+  var copyEmailBtn = document.getElementById('copy-email');
+  if (copyEmailBtn) {
+    copyEmailBtn.addEventListener('click', function () {
+      var email = 'info@oreyatailor.com';
+      function done() { showToast('Email copied to clipboard'); }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(email).then(done).catch(done);
+      } else {
+        var ta = document.createElement('textarea');
+        ta.value = email;
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); } catch (err) {}
+        document.body.removeChild(ta);
+        done();
+      }
+    });
+  }
+
+  (function () {
+    var quoteForm = document.getElementById('quote-form');
+    var formError = document.getElementById('form-error');
+    var modalMain = document.getElementById('modal-main');
+    var success = document.getElementById('modal-success');
+    function showSuccess() {
+      modalMain.style.display = 'none';
+      success.style.display = 'block';
+    }
+    quoteForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var email = quoteForm.querySelector('input[type="email"]').value;
+      var msg = quoteForm.querySelector('textarea').value;
+      var submitBtn = quoteForm.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Sending...';
+      formError.style.display = 'none';
+      fetch('https://formsubmit.co/ajax/info@oreyatailor.com', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          _subject: 'Project Quote Request - Oreya Tailor',
+          _captcha: 'false',
+          _replyto: email,
+          Email: email,
+          Message: msg
+        })
+      })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          if (data && (data.success === true || data.success === 'true')) {
+            showSuccess();
+          } else {
+            var reason = (data && data.message) ? ' (' + data.message + ')' : '';
+            formError.innerHTML = "Couldn't send right now" + reason + '. You can also <a href="mailto:info@oreyatailor.com" style="color:var(--brand)">email us directly</a>.';
+            formError.style.display = 'block';
+          }
+        })
+        .catch(function () {
+          formError.innerHTML = 'Connection problem. Please <a href="mailto:info@oreyatailor.com" style="color:var(--brand)">email us directly</a> or call the number above.';
+          formError.style.display = 'block';
+        })
+        .finally(function () {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Send Message';
+        });
+    });
+  })();
 
   (function () {
     var modalEl = document.getElementById('modal');
-    var success = document.getElementById('modal-success');
     function resetModal() {
-      success.style.display = 'none';
-      Array.prototype.forEach.call(modalEl.querySelectorAll('.modal > *:not(.modal-close):not(.modal-success)'), function (el) {
-        el.style.display = '';
-      });
+      document.getElementById('modal-success').style.display = 'none';
+      document.getElementById('modal-main').style.display = '';
+      document.getElementById('form-error').style.display = 'none';
       var f = document.getElementById('quote-form');
       if (f) f.reset();
     }
